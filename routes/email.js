@@ -21,10 +21,10 @@ router.get('/', async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
-});
+})
 
 router.get('/:emailid', async (req, res) => {
-    const recipientEmail = req.params.emailid;
+    const recipientEmail = req.params.emailid
     try {
         const emails = await Email.find({email: recipientEmail})
         if (emails == null) {
@@ -34,26 +34,31 @@ router.get('/:emailid', async (req, res) => {
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
-});
+})
 
 router.post('/', async (req, res) => {
-    const { email, subject, content } = req.body
+    const { emails, subject, content } = req.body
 
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: subject,
-        text: content
+    if (!Array.isArray(emails) || emails.length === 0) {
+        return res.status(400).send('Emails should be a non-empty array')
     }
 
     try {
-        await transporter.sendMail(mailOptions)
-        const newEmail = new Email({ email, subject, content })
-        const savedEmail = await newEmail.save()
-        res.status(201).json(savedEmail)
-    } catch (err) {
+        for (const email of emails){
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: subject,
+                text: content
+            }
+            await transporter.sendMail(mailOptions)
+            const newEmail = new Email({ email, subject, content })
+            await newEmail.save()
+        }
+        res.status(200).send('Emails sent and saved successfully')
+    } catch (err) { 
         res.status(500).json({ message: err.message })
     }
 })
-
+    
 module.exports = router
