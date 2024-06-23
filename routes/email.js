@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-router.get('/', async (req, res) => {
+router.get('/sent', async (req, res) => {
     try {
         const emails = await Email.find()
         res.json(emails)
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/:emailid', async (req, res) => {
+router.get('/sent/:emailid', async (req, res) => {
     const recipientEmail = req.params.emailid
     try {
         const emails = await Email.find({email: recipientEmail})
@@ -36,15 +36,17 @@ router.get('/:emailid', async (req, res) => {
     }
 })
 
+
 router.post('/', async (req, res) => {
     const { emails, subject, content } = req.body
+    const emailsArray = emails.split(',').map(email => email.trim())
 
-    if (!Array.isArray(emails) || emails.length === 0) {
+    if (!Array.isArray(emailsArray) || emailsArray.length === 0) {
         return res.status(400).send('Emails should be a non-empty array')
     }
 
     try {
-        for (const email of emails){
+        for (const email of emailsArray){
             const mailOptions = {
                 from: process.env.EMAIL_USER,
                 to: email,
