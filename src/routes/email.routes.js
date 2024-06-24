@@ -1,72 +1,13 @@
 const express = require('express')
-const nodemailer = require('nodemailer')
-const Email = require('../models/Email.models')
 const router = express.Router()
+const emailController = require('../controllers/emailController')
 
 const dotenv = require('dotenv');
 dotenv.config()
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-})
-
-router.get('/', (req, res) => {
-    res.render('index')
-})
-
-router.get('/sent', async (req, res) => {
-    try {
-        const emails = await Email.find()
-        res.render('emails', { emails: emails })
-    } catch (err) {
-        console.error(err)
-        res.status(500).send('Internal Server Error')
-    }
-})
-
-router.get('/sent/:recipientEmail', async (req, res) => {
-    const { recipientEmail } = req.params
-    try {
-        const emails = await Email.find({ email: recipientEmail })
-        if (emails.length) {
-            res.render('emails', { emails: emails })
-        } else {
-            res.status(404).send('Email not found')
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error')
-    }
-})
-
-router.post('/', async (req, res) => {
-    const { emails, subject, content } = req.body
-    const emailsArray = emails.split(',').map(email => email.trim())
-
-    if (!Array.isArray(emailsArray) || emailsArray.length === 0) {
-        return res.status(400).send('Emails should be a non-empty array')
-    }
-
-    try {
-        for (const email of emailsArray){
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: subject,
-                text: content
-            }
-            await transporter.sendMail(mailOptions)
-            const newEmail = new Email({ email, subject, content })
-            await newEmail.save()
-        }
-        res.status(200).send('Emails sent and saved successfully')
-    } catch (err) { 
-        res.status(500).json({ message: err.message })
-    }
-})
+router.get('/', emailController.renderHomePage)
+router.post('/', emailController.sendEmails)
+router.get('/sent', emailController.getAllEmails)
+router.get('/sent/:recipientEmail', emailController.getEmailsByRecipient)
     
 module.exports = router

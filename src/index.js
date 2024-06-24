@@ -17,8 +17,10 @@ mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('MongoDB connected'))
 .catch((err) => console.log(err))
 
-const emailRoute = require('./routes/email.routes.js')
+const emailRoute = require('./routes/email.routes')
+// const userRoute = require('./routes/user.routes')
 app.use('/email', emailRoute)
+// app.use('/user', userRoute)
 
 
 app.listen(port, () => {
