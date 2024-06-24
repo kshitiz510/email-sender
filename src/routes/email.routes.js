@@ -1,6 +1,6 @@
 const express = require('express')
 const nodemailer = require('nodemailer')
-const Email = require('../models/User')
+const Email = require('../models/Email.models')
 const router = express.Router()
 
 const dotenv = require('dotenv');
@@ -14,10 +14,14 @@ const transporter = nodemailer.createTransport({
     }
 })
 
+router.get('/', (req, res) => {
+    res.render('index')
+})
+
 router.get('/sent', async (req, res) => {
     try {
         const emails = await Email.find()
-        res.render('emails', { emails })
+        res.render('emails', { emails: emails })
     } catch (err) {
         console.error(err)
         res.status(500).send('Internal Server Error')
@@ -27,9 +31,9 @@ router.get('/sent', async (req, res) => {
 router.get('/sent/:recipientEmail', async (req, res) => {
     const { recipientEmail } = req.params
     try {
-        const email = await Email.find({ email: recipientEmail })
-        if (email.length) {
-            res.render('emails', { emails: email })
+        const emails = await Email.find({ email: recipientEmail })
+        if (emails.length) {
+            res.render('emails', { emails: emails })
         } else {
             res.status(404).send('Email not found')
         }
