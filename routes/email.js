@@ -17,25 +17,27 @@ const transporter = nodemailer.createTransport({
 router.get('/sent', async (req, res) => {
     try {
         const emails = await Email.find()
-        res.json(emails)
+        res.render('emails', { emails })
     } catch (err) {
-        res.status(500).json({ message: err.message })
+        console.error(err)
+        res.status(500).send('Internal Server Error')
     }
 })
 
-router.get('/sent/:emailid', async (req, res) => {
-    const recipientEmail = req.params.emailid
+router.get('/sent/:recipientEmail', async (req, res) => {
+    const { recipientEmail } = req.params
     try {
-        const emails = await Email.find({email: recipientEmail})
-        if (emails == null) {
-            return res.status(404).json({ message: 'Email not found' })
+        const email = await Email.find({ email: recipientEmail })
+        if (email.length) {
+            res.render('emails', { emails: email })
+        } else {
+            res.status(404).send('Email not found')
         }
-        res.json(emails)
     } catch (err) {
-        res.status(500).json({ message: err.message })
+        console.error(err);
+        res.status(500).send('Internal Server Error')
     }
 })
-
 
 router.post('/', async (req, res) => {
     const { emails, subject, content } = req.body

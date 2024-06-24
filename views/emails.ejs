@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sent Emails</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #007BFF;
+        }
+
+        .email {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .email h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .email p {
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Sent Emails</h1>
+        <% if (emails.length > 0) { %>
+            <% emails.forEach(email => { %>
+                <div class="email">
+                    <h3>Subject: <%= email.subject %></h3>
+                    <p><strong>To:</strong> <%= email.email %></p>
+                    <p><strong>Sent At:</strong> <%= email.createdAt %></p>
+                    <p><strong>Content:</strong></p>
+                    <p><%= email.content %></p>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No emails found.</p>
+        <% } %>
+    </div>
+</body>
+
+</html>

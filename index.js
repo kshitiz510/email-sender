@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use('/email', emailRoute)
 
-app.get('/', (req, res) => {
+app.get(['/','/email'], (req, res) => {
     res.render('index')
 })
 
