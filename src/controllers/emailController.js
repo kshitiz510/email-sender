@@ -13,7 +13,7 @@ const sendEmails = async (req, res) => {
         service: 'gmail',
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
+            pass:    process.env.EMAIL_PASS
         }
     })
 
@@ -26,7 +26,7 @@ const sendEmails = async (req, res) => {
         }
 
         await transporter.sendMail(mailOptions)
-        await Email.create({email: recipient, subject, content})
+        await Email.create({email: recipient, subject, content, sender: req.session.userId})
     }
 
     for (const email of emailsArray) {
@@ -37,14 +37,25 @@ const sendEmails = async (req, res) => {
 }
 
 const getAllEmails = async (req, res) => {
-    const emails = await Email.find()
-    res.render('emails', {emails: emails})
+    try {
+        const emails = await Email.find({ sender: req.session.userId });
+        res.render('emails', { emails });
+    } catch (error) {
+        res.status(500).json({error: 'Failed to fetch emails'})
+    }
+    
+    // const emails = await Email.find()
+    // res.render('emails', {emails: emails})
 }
 
 const getEmailsByRecipient = async (req, res) => {
-    const {recipientEmail} = req.params
-    const emails = await Email.find({ email: recipientEmail })
+    try{
+        const {recipientEmail} = req.params
+    const emails = await Email.find({ email: recipientEmail, sender: req.session.userId })
     res.render('emails', {emails: emails})
+    } catch(error) {
+        res.stats(500).json({error: 'Failed to fetch emails'})
+    }
 }
 
 module.exports = {
